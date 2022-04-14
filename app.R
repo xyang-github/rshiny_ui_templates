@@ -10,13 +10,15 @@ ui <- fluidPage(
     tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"),
     tags$script(src = "app.js"),
     tags$script("
-      Shiny.addCustomMessageHandler('remove_load', function(message) {
+      Shiny.addCustomMessageHandler('remove_load_server', function(message) {
         $('#header_database').removeClass('animate-flicker');
         $('#header_database').text('Select a database:');
-        $('#select_database_wrapper').removeClass('is-loading');
+        $('#select_database_wrapper').removeClass(message);
         $('#select_database_wrapper').addClass('is-info');
-        $('#select_database').prop('disabled', false);})
-                ")
+        $('#select_database').prop('disabled', false);});
+
+      Shiny.addCustomMessageHandler('remove_load_submit', function(message) {
+        $('#btn_submit').removeClass(message);})")
   ),
   fluidRow(
     column(width = 8, offset = 2,
@@ -24,10 +26,12 @@ ui <- fluidPage(
              tags$h4("Select a model vendor:")),
            fluidRow(
              column(width = 6,
-                    tags$button(class = "button is-small is-info is-outlined",
+                    tags$button(class = "button is-small is-info is-outlined
+                                shiny-bound-input action-button",
                                 id = "btn_air", "AIR")),
              column(width = 6,
-                    tags$button(class = "button is-small is-info is-outlined",
+                    tags$button(class = "button is-small is-info is-outlined
+                                shiny-bound-input action-button",
                                 id = "btn_rms", "RMS"))
              ),
            fluidRow(
@@ -60,7 +64,13 @@ ui <- fluidPage(
                         disabled = TRUE,
                         tags$option(selected = TRUE, "")
                       )
-             ))
+             )),
+           fluidRow(
+             tags$button(class = "button is-fullwidth is-rounded is-outlined
+                         is-info shiny-bound-input action-button",
+                         id = "btn_submit",
+                         "Submit Dataset")
+           )
            )
     ))
 
@@ -76,8 +86,18 @@ server <- function(input, output, session) {
     updateSelectInput(inputId = "select_database",
                       choices = c("Option 1", "Option 2"))
 
-    session$sendCustomMessage(type = "remove_load", message = "is-loading")
+    session$sendCustomMessage(type = "remove_load_server",
+                              message = "is-loading")
   })
+
+  # Remove loading spinner after an event has completed
+  observeEvent(input$btn_submit, {
+    Sys.sleep(3)
+
+    session$sendCustomMessage(type = "remove_load_submit",
+                              message = "is-loading")
+  })
+
 }
 
 # Run the application

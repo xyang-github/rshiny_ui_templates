@@ -44,6 +44,10 @@
        $('#header_database').text('Loading the database...');
      };
    });
+
+   $('#btn_submit').on('click', function() {
+     $(this).addClass("is-loading")
+   })
  })
 
 
