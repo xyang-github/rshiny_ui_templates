@@ -1,70 +1,102 @@
 library(shiny)
+library(waiter)
 
 options(shiny.maxRequestSize=200*1024^2)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-    tags$head(
-        tags$link(rel = "stylesheet",
-                  type = "text/css",
-                  href = "progressbar.css"),
-        tags$script(src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"),
-        tags$script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"),
-        tags$script(src="progressbar.js")
-    ),
-    fluidRow(
-        column(8, offset=2,
-               tags$form(id="msform",
-                         tags$div(class="header",
-                                  tags$h1("Web Application - Progressbar UI")
-                         ),
-                         # Progress bar
-                         tags$div(id="progressbar_wrapper",
-                                  tags$ul(id="progressbar",
-                                          tags$li(HTML("<span class='step active'>1</span><br><span class='step_description'>Description</span>")),
-                                          tags$li(HTML("<span class='step'>2</span><br><span class='step_description'>Description</span>")),
-                                          tags$li(HTML("<span class='step'>3</span><br><span class='step_description'>Description</span>")))
-                         ),
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "app.css"),
+    tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"),
+    tags$script(src = "app.js"),
+    tags$script("
+      Shiny.addCustomMessageHandler('remove_load_server', function(message) {
+        $('#header_database').removeClass('animate-flicker');
+        $('#header_database').text('Select a database:');
+        $('#select_database_wrapper').removeClass(message);
+        $('#select_database_wrapper').addClass('is-info');
+        $('#select_database').prop('disabled', false);});
 
-                         # Fieldsets
-                         tags$fieldset(
-                             tags$h2(class="fs-title", "Step 1"),
-                             tags$h3(class="fs-subtitle", "This is step 1"),
-                             tags$input(type="button",
-                                        name="next",
-                                        class="next action-button",
-                                        value="Next")
-                         ),
-                         tags$fieldset(
-                             tags$h2(class="fs-title", "Step 2"),
-                             tags$h3(class="fs-subtitle", "This is step 2"),
-                             tags$input(type="button",
-                                        name="previous",
-                                        class="previous action-button",
-                                        value="Previous"),
-                             tags$input(type="button",
-                                        name="next",
-                                        class="next action-button",
-                                        value="Next")
-                         ),
-                         tags$fieldset(
-                             tags$h2(class="fs-title", "Step 3"),
-                             tags$h3(class="fs-subtitle", "This is step 3"),
-                             tags$input(type="button",
-                                        name="previous",
-                                        class="previous action-button",
-                                        value="Previous"),
-                             tags$input(type="button",
-                                        name="submit",
-                                        class="submit action-button",
-                                        value="Submit")
-                             ))
-               )
-        )
-)
+      Shiny.addCustomMessageHandler('remove_load_submit', function(message) {
+        $('#btn_submit').removeClass(message);})")
+  ),
+  fluidRow(
+    column(width = 8, offset = 2,
+           fluidRow(
+             tags$h4("Select a model vendor:")),
+           fluidRow(
+             column(width = 6,
+                    tags$button(class = "button is-small is-info is-outlined
+                                shiny-bound-input action-button",
+                                id = "btn_air", "AIR")),
+             column(width = 6,
+                    tags$button(class = "button is-small is-info is-outlined
+                                shiny-bound-input action-button",
+                                id = "btn_rms", "RMS"))
+             ),
+           fluidRow(
+             tags$h4(id = "header_server",
+                     class = "hidden",
+                     "Select a server:")
+           ),
+           fluidRow(
+             tags$div(class = "select is-info is-fullwidth hidden",
+                      id = "select_server_wrapper",
+                      tags$select(
+                        id = "select_server",
+                        tags$option(selected = TRUE, ""),
+                        tags$option("Option 1"),
+                        tags$option("Option 2")
+
+                        )
+                      )
+           ),
+           fluidRow(
+             tags$h4(id = "header_database",
+                     class = "hidden animate-flicker",
+                     "Loading the database...")
+           ),
+           fluidRow(
+             tags$div(class = "select is-info is-fullwidth is-loading hidden",
+                      id = "select_database_wrapper",
+                      tags$select(
+                        id = "select_database",
+                        disabled = TRUE,
+                        tags$option(selected = TRUE, "")
+                      )
+             )),
+           fluidRow(
+             tags$button(class = "button is-fullwidth is-rounded is-outlined
+                         is-info shiny-bound-input action-button",
+                         id = "btn_submit",
+                         "Submit Dataset")
+           )
+           )
+    ))
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
+
+  # Remove loading spinner after database has loaded, and updates selection
+  # options
+  observeEvent(input$select_server, {
+    req(input$select_server)
+
+    Sys.sleep(3)
+    updateSelectInput(inputId = "select_database",
+                      choices = c("Option 1", "Option 2"))
+
+    session$sendCustomMessage(type = "remove_load_server",
+                              message = "is-loading")
+  })
+
+  # Remove loading spinner after an event has completed
+  observeEvent(input$btn_submit, {
+    Sys.sleep(3)
+
+    session$sendCustomMessage(type = "remove_load_submit",
+                              message = "is-loading")
+  })
 
 }
 

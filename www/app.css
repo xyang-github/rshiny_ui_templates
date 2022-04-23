@@ -1,0 +1,57 @@
+.row {
+  margin-bottom: 1rem;
+/*  border: 1px solid black;*/
+}
+
+/*.col-sm-6 {
+  border: 1px solid black;
+}
+*/
+
+h4 {
+  text-align: center;
+}
+
+#btn_air {
+  float: right;
+}
+
+#btn_rms {
+  float: left;
+}
+
+.button {
+  width: 50px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* flickering text */
+@keyframes flickerAnimation {
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+@-o-keyframes flickerAnimation{
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+@-moz-keyframes flickerAnimation{
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+@-webkit-keyframes flickerAnimation{
+  0%   { opacity:1; }
+  50%  { opacity:0; }
+  100% { opacity:1; }
+}
+.animate-flicker {
+   -webkit-animation: flickerAnimation 1s infinite;
+   -moz-animation: flickerAnimation 1s infinite;
+   -o-animation: flickerAnimation 1s infinite;
+    animation: flickerAnimation 1s infinite;
+}
